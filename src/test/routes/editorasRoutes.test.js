@@ -1,6 +1,6 @@
 /* eslint-disable linebreak-style */
 import {
-  afterEach, beforeEach, describe, expect, it,
+  afterEach, beforeEach, describe, expect, it, test, jest,
 } from '@jest/globals';
 // import Editora from '../../models/editora';
 // import rotasEditora from '../../routes/editorasRoutes';
@@ -37,16 +37,34 @@ describe('Testes de POST em /editoras', () => {
 
     idResposta = resposta.body.content.id;
   });
-});
 
-describe('Teste de DELETE em /editoras/id', () => {
-  it('Deve deletar uma editora', async () => {
-    await request(app).delete(`/editoras/${idResposta}`).expect(200);
+  it('Deve não adicionar nada ao passar o body vazio', async () => {
+    await request(app).post('/editoras').send({}).expect(400);
   });
 });
 
 describe('Teste de GET em /editoras/id', () => {
   it('Deve retornar uma editora', async () => {
     await request(app).get(`/editoras/${idResposta}`).expect(200);
+  });
+});
+
+describe('Teste de PUT em /editoras/id', () => {
+  test.each([
+    // Vai chamar vários testes diferentes, um para cada elemento
+    ['nome', { nome: 'Casa del Código' }],
+    ['cidade', { cidade: 'SP' }],
+    ['email', { email: 'cdc@cddc.com' }],
+  ])('Deve alterar o campo %s', async (chave, param) => {
+    const requisicao = { request };
+    const spy = jest.spyOn(requisicao, 'request');
+    await requisicao.request(app).put(`/editoras/${idResposta}`).send(param).expect(204);
+    expect(spy).toHaveBeenCalled();
+  });
+});
+
+describe('Teste de DELETE em /editoras/id', () => {
+  it('Deve deletar uma editora', async () => {
+    await request(app).delete(`/editoras/${idResposta}`).expect(200);
   });
 });
